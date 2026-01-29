@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Egamov Humoyunbek — Professional Portfolio with 3D Experience">
+  <title>Egamov Humoyunbek — Professional Portfolio</title>
+
+  <!-- Google Fonts (Clash Grotesk style via fallback) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== GLOBAL RESET & TYPOGRAPHY ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #121218;
+      --text: #e0e0ff;
+      --accent: #00f0ff;
+      --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ===== THREE.JS CANVAS ===== */
+    #threejs-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding: 0 2rem;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      background: linear-gradient(to bottom, #ffffff, var(--text));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-weight: 300;
+      opacity: 0.8;
+      max-width: 600px;
+    }
+
+    /* ===== NAVIGATION (minimal) ===== */
+    nav {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      opacity: 0.7;
+      transition: var(--transition);
+    }
+
+    nav a:hover {
+      opacity: 1;
+      color: var(--accent);
+    }
+    /* ===== RESPONSIVE SAFEGUARDS ===== */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        top: 1rem;
+        right: 1rem;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D Background Canvas -->
+  <canvas id="threejs-bg"></canvas>
+
+  <!-- Minimal Navigation -->
+  <nav>
+    <a href="/projects/index.html">Projects</a>
+    <a href="/contact.html">Contact</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Egamov Humoyunbek</h1>
+    <p>Professional Portfolio — Precision, Depth, and Digital Craftsmanship</p>
+  </section>
+
+  <!-- Three.js + GSAP Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Optimized Three.js Background: Floating Particles in Deep Space
+    const initThree = () => {
+      const canvas = document.getElementById('threejs-bg');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Add subtle ambient light
+      const ambientLight = new THREE.AmbientLight(0x00f0ff, 0.1);
+      scene.add(ambientLight);
+
+      // Create particles
+      const particleCount = 2000;
+      const particles = new THREE.BufferGeometry();
+      const posArray = new Float32Array(particleCount * 3);
+      const colorArray = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        posArray[i] = (Math.random() - 0.5) * 200;     // x
+        posArray[i + 1] = (Math.random() - 0.5) * 200; // y
+        posArray[i + 2] = (Math.random() - 0.5) * 200; // z
+
+        colorArray[i] = 0.1;
+        colorArray[i + 1] = 0.2;
+        colorArray[i + 2] = 0.4;
+      }
+
+      particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      particles.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.8,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.7,
+        sizeAttenuation: true
+      });
+
+      const particleSystem = new THREE.Points(particles, material);
+      scene.add(particleSystem);
+
+      camera.position.z = 30;
+
+      // Animation loop
+      const animate = () => {
+        requestAnimationFrame(animate);
+        particleSystem.rotation.x += 0.0002;
+        particleSystem.rotation.y += 0.0003;
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      // Handle resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    };
+
+    // Initialize only when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initThree);
+    } else {
+      initThree();
+    }
+  </script></body>
+</html>
